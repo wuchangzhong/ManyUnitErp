@@ -1,0 +1,59 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context="com.wochu.adjust.ui.MainActivity" >
+   <LinearLayout
+       	android:id="@+id/lv_sweepcode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+        <Button
+            android:id="@+id/btn_trance_orderNumber "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:background="@drawable/pressbutton_selector"
+            android:drawableRight="@drawable/th_camera"
+            android:text="点击右侧钮自动扫码"
+            android:textSize="18sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pressbutton_selector"
+            android:orientation="horizontal" >
+            <EditText
+                android:id="@+id/et_code"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:hint="请输入货位号"
+                android:singleLine="true" />
+            <Button
+                android:id="@+id/btn_confirm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="确认" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_below="@id/lv_sweepcode"
+            android:id="@+id/tv_huoweihao"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_line_selected"
+            android:gravity="center_vertical"
+            android:text="货位号:"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+ 		<ExpandableListView
+ 		    	android:layout_below="@id/tv_huoweihao"
+                android:id="@+id/listview_showinformation"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible" >
+         </ExpandableListView>
+</RelativeLayout>

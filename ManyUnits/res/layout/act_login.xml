@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:background="#aa6B8E23"
+    >
+
+   <EditText
+       android:singleLine="true"
+       android:id="@+id/et_password"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_alignParentLeft="true"
+       android:layout_below="@+id/et_username"
+       android:ems="10"
+       android:inputType="numberPassword" />
+<LinearLayout 
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_below="@+id/et_password"
+    >
+ <Button
+    android:id="@+id/btn_login"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:text="登录" />
+  <Button
+    android:id="@+id/btn_equit"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:text="退出" />
+</LinearLayout>
+<TextView
+    android:id="@+id/login"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true"
+    android:gravity="center_horizontal"
+    android:layout_marginTop="23dp"
+    android:text="请登录工号" 
+android:textSize="24sp"
+/>
+<EditText
+    android:id="@+id/et_username"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@+id/login"
+    android:ems="10"
+    android:hint="请输入工号"
+    android:singleLine="true" />
+</RelativeLayout>
+
