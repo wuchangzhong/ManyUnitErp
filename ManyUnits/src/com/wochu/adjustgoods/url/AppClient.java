@@ -15,5 +15,5 @@ public class AppClient {
 	//获取商品货位号地址
 	public static final String LOCATIONURL="http://58.247.11.228:8088/LocationGoods/GetLocationInfo?GoodsCode=";
 	//获取货位商品信息地址
-	public static final String GetGoodInformations = "";
+	public static final String GetGoodInformations = "http://58.247.11.228:8088/LocGoodInventory/GetLocationInventory?LocCode=";
 }

@@ -31,7 +31,7 @@
             android:layout_centerHorizontal="true"  
             android:text="Thehe"  
             android:textColor="@android:color/black"
-            
+
             />  
     </RelativeLayout>  
  </android.support.v7.widget.CardView>  
