@@ -202,26 +202,36 @@ containing a value of this type.
         public static final int xujian=0x7f020027;
     }
     public static final class id {
-        public static final int action_settings=0x7f0a0013;
+        public static final int action_settings=0x7f0a001d;
+        public static final int btn_cancel=0x7f0a0013;
         public static final int btn_confirm=0x7f0a0009;
         public static final int btn_equit=0x7f0a0003;
         public static final int btn_login=0x7f0a0002;
+        public static final int btn_ok=0x7f0a0012;
         public static final int btn_trance_orderNumber =0x7f0a0007;
-        public static final int card_view=0x7f0a0010;
+        public static final int card_view=0x7f0a0014;
+        public static final int dadanwei=0x7f0a001a;
+        public static final int ed_dadanwei=0x7f0a0010;
         public static final int et_code=0x7f0a0008;
         public static final int et_password=0x7f0a0000;
         public static final int et_username=0x7f0a0001;
+        public static final int goodsCode=0x7f0a001b;
+        public static final int goodsName=0x7f0a001c;
         public static final int gv_functions=0x7f0a000c;
-        public static final int img=0x7f0a0011;
+        public static final int img=0x7f0a0015;
         public static final int listview_showinformation=0x7f0a000b;
         public static final int login=0x7f0a0004;
         public static final int lv_erpFunction=0x7f0a0005;
+        public static final int lv_goodAdjust=0x7f0a0017;
         public static final int lv_huoweishow=0x7f0a000d;
         public static final int lv_sweepcode=0x7f0a0006;
-        public static final int text_desc=0x7f0a0012;
+        public static final int picihao=0x7f0a0019;
+        public static final int text_desc=0x7f0a0016;
+        public static final int title=0x7f0a0018;
         public static final int tv_goodscode=0x7f0a000e;
         public static final int tv_goodsname=0x7f0a000f;
         public static final int tv_huoweihao=0x7f0a000a;
+        public static final int xiaodanwei=0x7f0a0011;
     }
     public static final class layout {
         public static final int act_login=0x7f030000;
@@ -229,8 +239,11 @@ containing a value of this type.
         public static final int activity_adjustgoods=0x7f030002;
         public static final int activity_main=0x7f030003;
         public static final int actvity_goodsquery=0x7f030004;
-        public static final int erp_functions=0x7f030005;
-        public static final int lv_sweepcode=0x7f030006;
+        public static final int adjustgoodact_dialog_view=0x7f030005;
+        public static final int erp_functions=0x7f030006;
+        public static final int goodadjust_item=0x7f030007;
+        public static final int goodclassbycode_item=0x7f030008;
+        public static final int lv_sweepcode=0x7f030009;
     }
     public static final class menu {
         public static final int main=0x7f090000;
@@ -264,6 +277,9 @@ containing a value of this type.
         public static final int CardView_Dark=0x7f060002;
         public static final int CardView_Light=0x7f060001;
         public static final int goodsquery=0x7f060005;
+        /**  模糊 
+         */
+        public static final int pick_dialog=0x7f060006;
     }
     public static final class styleable {
         /** Attributes that can be used with a CardView.

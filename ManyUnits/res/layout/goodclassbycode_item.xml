@@ -2,7 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_line_selected"
+    android:gravity="center_vertical"
     android:orientation="vertical" >
-    
+   <RelativeLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:gravity="center_vertical"
+       >
+       <TextView 
+           android:id="@+id/goodsCode"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="商品编码:"
+           android:textSize="16sp"
+           android:textColor="@android:color/black"
+           android:gravity="center_vertical"
+           />
+       <TextView 
+           android:textColor="@android:color/black"
+           android:id="@+id/goodsName"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_toRightOf="@id/goodsCode"
+           android:layout_margin="10dp"
+           android:text="商品名称:"
+           android:textSize="16sp"
+           android:gravity="center_vertical"
+           android:layout_alignBaseline="@id/goodsCode"
+           />
+   </RelativeLayout>
 
 </LinearLayout>
