@@ -6,25 +6,36 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.google.gson.Gson;
 import com.squareup.okhttp.Request;
 import com.wochu.adjustgoods.R;
 import com.wochu.adjustgoods.bean.AdjustGoodBean;
 import com.wochu.adjustgoods.bean.AdjustGoodBean.Gooods;
+import com.wochu.adjustgoods.bean.GoodsQuery.GoodsBean;
 import com.wochu.adjustgoods.net.OkHttpClientManager;
 import com.wochu.adjustgoods.net.OkHttpClientManager.ResultCallback;
 import com.wochu.adjustgoods.url.AppClient;
+import com.wochu.adjustgoods.utils.JsonUtil;
 import com.wochu.adjustgoods.utils.LogUtil;
+import com.wochu.adjustgoods.utils.SharePreUtil;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -37,57 +48,209 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class AdjustGoodsAct extends Activity implements OnClickListener{
-
 	private Button btn_trance_orderNumber;
 	private EditText et_code;
 	private Button btn_confirm;
 	private TextView tv_huoweihao;
 	private ExpandableListView listview_showinformation;
 	private String locationCode = "";
-	private ArrayList<String> goodsCodelist = new ArrayList<>();//商品编码的集合
-	private ArrayList<ArrayList<Gooods>> list = new ArrayList<>();//存放每种商品的集合
 	private Context mcontext;
 	private MyAdapter myAdapter;
+	private Button summit;
+	private int userID;//工人工号
+	private MyAdapter myAdapterInvalid ;//作废的适配器
+	private Handler handler = new Handler();
+	private LinearLayout lv_TakingInventoryArea;
+	private LinearLayout lv_MistakenDeleteArea;
+	private TextView tv_TakingInventoryArea;
+	private ImageView iv_TakingInventoryArea;
+	private TextView tv_MistakenDeleteArea;
+	private ImageView iv_MistakenDeletAarea;
+	private ExpandableListView listview_MistakenDeleteInformation;
+	private Button btn_invalid;
+	/**
+	 *盘货区集合
+	 */
+	private ArrayList<Long> longList = new ArrayList<Long>();
+	private ArrayList<String> goodsCodelist = new ArrayList<>();//商品编码的集合
+	private ArrayList<ArrayList<Gooods>> list = new ArrayList<>();//存放每种商品的集合
+	private ArrayList<AdjustGoodBean.Gooods> gooodsList = new ArrayList<>();//所有批次号商品的集合
+	/**
+	 * 作废区集合
+	 */
+	private ArrayList<Gooods> invalidGoods = new ArrayList<AdjustGoodBean.Gooods>();//作废批次商品集合
+	private ArrayList<String> invalidGoodsCodeList = new ArrayList<String>();//作废商品总类的集合
+	private ArrayList<ArrayList<Gooods>> invalidList = new ArrayList<>();//存放每种作废商品的集合
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_adjustgoods);
 		initView();
 		mcontext = this;
+		userID = SharePreUtil.getInteger(mcontext,"userID",-1);
+		setListener();
 	}
+	/**
+	 * 初始化
+	 */
 	private void initView() {
-		// TODO Auto-generated method stub
+		lv_TakingInventoryArea = (LinearLayout) findViewById(R.id.lv_TakingInventoryArea);
+		tv_TakingInventoryArea = (TextView) findViewById(R.id.tv_TakingInventoryArea);
+		iv_TakingInventoryArea = (ImageView) findViewById(R.id.iv_TakingInventoryArea);
+		lv_MistakenDeleteArea = (LinearLayout) findViewById(R.id.lv_MistakenDeleteArea);
+		tv_MistakenDeleteArea = (TextView) findViewById(R.id.tv_MistakenDeleteArea);
+		iv_MistakenDeletAarea = (ImageView) findViewById(R.id.iv_MistakenDeletAarea);
+		summit = (Button) findViewById(R.id.summit);
 		btn_trance_orderNumber = (Button) findViewById(R.id.btn_trance_orderNumber);
 		et_code = (EditText) findViewById(R.id.et_code);
 		btn_confirm = (Button) findViewById(R.id.btn_confirm);
 		tv_huoweihao = (TextView) findViewById(R.id.tv_huoweihao);
 		listview_showinformation = (ExpandableListView) findViewById(R.id.listview_showinformation);
-		myAdapter = new MyAdapter();
+		listview_MistakenDeleteInformation = (ExpandableListView) findViewById(R.id.listview_MistakenDeleteInformation);
+		myAdapter = new MyAdapter(list);
 		listview_showinformation.setAdapter(myAdapter);
-		btn_confirm.setOnClickListener(this);
+		myAdapterInvalid = new MyAdapter(invalidList);
+		listview_MistakenDeleteInformation.setAdapter(myAdapterInvalid);
 		listview_showinformation.setGroupIndicator(null);//将控件默认的左边箭头去掉
-		listview_showinformation.setOnChildClickListener(new OnChildClickListener() {
-			
-			@Override
-			public boolean onChildClick(ExpandableListView parent, View v,
-					int groupPosition, int childPosition, long id) {
-				// TODO Auto-generated method stub
-				showPickdialog(v, groupPosition,childPosition);
-				return true;
-			}
-		});
-			
+		listview_MistakenDeleteInformation.setGroupIndicator(null);
 	}
 	/**
-	 * 弹出对话框
+	 * 设置监听器
 	 */
-	private void showPickdialog(final View view,final int groupPosition,int childPosition) {
+	public void setListener() {
+		lv_TakingInventoryArea.setOnClickListener(this);
+		lv_MistakenDeleteArea.setOnClickListener(this);
+		btn_confirm.setOnClickListener(this);
+		summit.setOnClickListener(this);
+		listview_showinformation.setOnChildClickListener(new OnChildClickListener() {
+			@Override
+			public boolean onChildClick(ExpandableListView parent,final View v, int groupPosition, int childPosition,
+							long id) {
+						// TODO Auto-generated method stub
+						showPickdialog(v, groupPosition, childPosition, id);
+						v.setBackgroundColor(Color.GREEN);
+						handler.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								v.setBackgroundColor(Color.WHITE);
+							}
+						}, 500);
+
+						return true;
+					}
+				});
+		listview_MistakenDeleteInformation.setOnChildClickListener(new OnChildClickListener() {
+			@Override
+			public boolean onChildClick(ExpandableListView parent,final View v, final int groupPosition, final int childPosition,
+							long id) {
+						// TODO Auto-generated method stub
+						final Dialog dialog = showPickdialog(v, groupPosition,
+								childPosition, id,
+								R.layout.adjustgoodact_invalid_dialog);
+						v.setBackgroundColor(Color.GREEN);
+						handler.postDelayed(new Runnable() {
+
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								v.setBackgroundColor(Color.WHITE);
+							}
+						}, 500);
+
+						Button btn_ok = (Button) dialog
+								.findViewById(R.id.btn_ok);
+						Button btn_cancel = (Button) dialog
+								.findViewById(R.id.btn_cancel);
+						btn_ok.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								// TODO Auto-generated method stub
+							Gooods goods = (Gooods) myAdapterInvalid.getChild(groupPosition, childPosition);//获得选的批次商品
+							goods.STATUS = 1;
+							gooodsList= new ArrayList<AdjustGoodBean.Gooods>();
+							gooodsList.add(goods);
+							goodsCodelist.clear();
+							list.clear();
+							//分类操作
+							goodClassificationByCode(gooodsList, goodsCodelist, list);
+							myAdapter.list = list;
+							myAdapter.notifyDataSetChanged();
+							tv_TakingInventoryArea.setTextColor(Color.GREEN);
+							iv_TakingInventoryArea.setVisibility(View.VISIBLE);
+							listview_MistakenDeleteInformation.setVisibility(View.INVISIBLE);
+							tv_MistakenDeleteArea.setTextColor(Color.BLACK);
+							iv_MistakenDeletAarea.setVisibility(View.INVISIBLE);
+							listview_showinformation.setVisibility(View.VISIBLE);
+							dialog.dismiss();
+							tv_huoweihao.setText("货位号:"+myAdapter.list.get(0).get(0).LOCATIONCODE);
+							}
+						});
+						btn_cancel.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								// TODO Auto-generated method stub
+								dialog.dismiss();
+							}
+						});
+						return true;
+					}
+				});
+		
+	}
+	
+	/**
+	 * 弹出对话框2
+	 */
+	private Dialog showPickdialog(View v, int groupPosition, int childPosition,
+			long id, int layoutId) {
+		// TODO Auto-generated method stub
 		final Dialog dialog = new Dialog(AdjustGoodsAct.this,R.style.pick_dialog);
-		dialog.setContentView(R.layout.adjustgoodact_dialog_view);
+		dialog.setContentView(layoutId);
+		Window dialogWindow  = dialog.getWindow();
+		WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+	    dialogWindow.setGravity(Gravity.CENTER);
+	    WindowManager m = getWindowManager();
+	    Display d = m.getDefaultDisplay(); // 获取屏幕宽、高用
+	    WindowManager.LayoutParams p = dialogWindow.getAttributes(); // 获取对话框当前的参数值
+	    p.alpha=1.0f;
+	    p.height = (int) (d.getHeight() * 0.25); // 高度设置为屏幕的0.6
+	    p.width = (int) (d.getWidth() * 0.5); // 宽度设置为屏幕的0.65
+	    dialogWindow.setAttributes(p);
+	    dialog.show();
+	    dialog.setCanceledOnTouchOutside(false);
+	    return dialog;
+	}
+
+	/**
+	 * 弹出对话框1
+	 */
+	private void showPickdialog(final View view,final int groupPosition,final int childPosition,final Long id) {
+		String purunitname = list.get(groupPosition).get(childPosition).PURUNITNAME;//大单位名字
+		final String unitname = list.get(groupPosition).get(childPosition).UNITNAME;//小单位名字——
+		final Dialog dialog = new Dialog(AdjustGoodsAct.this,R.style.pick_dialog);
+		View adjustgoodact_dialog_view = View.inflate(mcontext, R.layout.adjustgoodact_dialog_view,null);
+		TextView tv_big = (TextView) adjustgoodact_dialog_view.findViewById(R.id.tv_big);
+		TextView tv_small = (TextView) adjustgoodact_dialog_view.findViewById(R.id.tv_small);
+		tv_big.setText(purunitname+":");
+		tv_small.setText(unitname+":");
+		LinearLayout small = (LinearLayout) adjustgoodact_dialog_view.findViewById(R.id.small);
+		if("——".equals(unitname)){
+			small.setVisibility(View.GONE);
+		}else{
+			small.setVisibility(View.VISIBLE);
+		}
+		dialog.setContentView(adjustgoodact_dialog_view);
 		Window dialogWindow  = dialog.getWindow();
 		WindowManager.LayoutParams lp = dialogWindow.getAttributes();
 	    dialogWindow.setGravity(Gravity.CENTER);
@@ -101,19 +264,65 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 	    Button btn_ok=(Button) dialog.findViewById(R.id.btn_ok);
 	    Button btn_cancel = (Button) dialog.findViewById(R.id.btn_cancel);
 	    final EditText ed_dadanwei = (EditText) dialog.findViewById(R.id.ed_dadanwei);//大单位的值
-	    final EditText xiaodanwei = (EditText) dialog.findViewById(R.id.xiaodanwei);//小单位的值
+	    btn_invalid = (Button) dialog.findViewById(R.id.btn_invalid);
 	    btn_ok.setOnClickListener(new OnClickListener() {//确定按钮
+	    	String smallUnits;
+	    	EditText xiaodanwei;
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub A2015103072004
+				String bigUnits = ed_dadanwei.getText().toString();//大单位
+				 if(!"——".equals(unitname)){
+					 xiaodanwei = (EditText) dialog.findViewById(R.id.xiaodanwei);
+					 smallUnits = xiaodanwei.getText().toString();//小单位
+				 }
 				if(TextUtils.isEmpty(ed_dadanwei.getText().toString())){
 					Toast.makeText(getBaseContext(),"大单位不能为空",0).show();
 					return;
 				}
-				if(TextUtils.isEmpty(xiaodanwei.getText().toString())){
-					Toast.makeText(getBaseContext(),"小单位不能为空",0).show();
-					return;
+				 if(!"——".equals(unitname)){
+					 if(TextUtils.isEmpty(xiaodanwei.getText().toString())){
+							Toast.makeText(getBaseContext(),"小单位不能为空",0).show();
+							return;
+					 }
+				 }
+				list.get(groupPosition).get(childPosition).BuyQty=Double.valueOf(bigUnits);
+				if(!"——".equals(unitname)){
+					list.get(groupPosition).get(childPosition).StoreQty = Double.valueOf(smallUnits);
 				}
+				Gooods gooods = list.get(groupPosition).get(childPosition);
+				list.get(groupPosition).remove(gooods);
+				list.get(groupPosition).add(gooods);
+				myAdapter.list = list;
+				myAdapter.notifyDataSetChanged();
+				view.setBackgroundColor(Color.GREEN);
+				if(!longList.contains(id)){
+					longList.add(id);
+				}
+				dialog.dismiss();
+			}
+		});
+	    btn_invalid.setOnClickListener(new OnClickListener() {//批次商品作废功能
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				list.get(groupPosition).get(childPosition).STATUS = 0;
+				String BatchCode = list.get(groupPosition).get(childPosition).GOODSBATCHCODE;
+				OkHttpClientManager.postAsyn(AppClient.getPostInvalidGood(getLocationCode(tv_huoweihao.getText().toString()), BatchCode,0),new ResultCallback<String>(){
+
+					@Override
+					public void onError(Request request, Exception e) {
+						// TODO Auto-generated method stub
+						Toast.makeText(getBaseContext(),"作废失败",0).show();
+					}
+					@Override
+					public void onResponse(String response) {
+						// TODO Auto-generated method stub
+						LogUtil.e("AdjustGoodsAct",response);
+						Toast.makeText(getBaseContext(),"作废成功",0).show();
+					}
+				});
 				
 				dialog.dismiss();
 			}
@@ -126,34 +335,100 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 			}
 		});
 	    dialog.show();
+	    dialog.setCanceledOnTouchOutside(false);
 	}
-
-	
+	/**
+	 * 点击事件
+	 */
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		btn_confirm.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				locationCode = et_code.getText().toString();
-				if(!TextUtils.isEmpty(locationCode)&&(!"".equals(locationCode))){
-					initData();
-					return;
-				}
-				Toast.makeText(getBaseContext(),"输入货位号不能为空",0).show();
+		switch (v.getId()) {
+		case R.id.btn_confirm:
+			locationCode = et_code.getText().toString();
+			if(!TextUtils.isEmpty(locationCode)&&(!"".equals(locationCode))){
+				getData();
+				return;
 			}
-		});
+			Toast.makeText(getBaseContext(),"请先扫描货位号",0).show();
+			break;
+		case R.id.lv_TakingInventoryArea://盘货区
+			tv_TakingInventoryArea.setTextColor(Color.GREEN);
+			iv_TakingInventoryArea.setVisibility(View.VISIBLE);
+			listview_MistakenDeleteInformation.setVisibility(View.INVISIBLE);
+			tv_MistakenDeleteArea.setTextColor(Color.BLACK);
+			iv_MistakenDeletAarea.setVisibility(View.INVISIBLE);
+			listview_showinformation.setVisibility(View.VISIBLE);
+			break;
+		case R.id.lv_MistakenDeleteArea://作废区
+			tv_TakingInventoryArea.setTextColor(Color.BLACK);
+			iv_TakingInventoryArea.setVisibility(View.INVISIBLE);
+			listview_MistakenDeleteInformation.setVisibility(View.VISIBLE);
+			tv_MistakenDeleteArea.setTextColor(Color.GREEN);
+			iv_MistakenDeletAarea.setVisibility(View.VISIBLE);
+			listview_showinformation.setVisibility(View.INVISIBLE);
+			//联网操作获取作废区批次商品
+			if(!(getLocationCode(tv_huoweihao.getText().toString()).length()>0)){
+				Toast.makeText(getBaseContext(),"请先扫描正确的货位号",0).show();
+				return;
+			}
+			OkHttpClientManager.getAsyn(AppClient.getInvalidGoodInformations(getLocationCode(tv_huoweihao.getText().toString()),0),new ResultCallback<AdjustGoodBean>() {
+				
+				@Override
+				public void onError(Request request, Exception e) {
+					// TODO Auto-generated method stub
+					Toast.makeText(getBaseContext(),"获取作废区商品参数失败",0).show();
+					invalidGoods.clear();
+				}
+				@Override
+				public void onResponse(AdjustGoodBean response) {
+					// TODO Auto-generated method stub
+					invalidGoods = (ArrayList<Gooods>) response.DATA;
+					Toast.makeText(getBaseContext(),"获取作废区商品参数成功",0).show();
+				}
+			});
+			//对所有作废商品进行分类
+			goodClassificationByCode(invalidGoods,invalidGoodsCodeList, invalidList);
+			myAdapterInvalid.list = invalidList;
+			myAdapterInvalid.notifyDataSetChanged();
+			break;
+		case R.id.summit://提交操作
+			postData();
+			break;
+		default:
+			break;
+		}
+	}
+	/**
+	 * 提交数据
+	 */
+	private void postData(){
+		Gson gson = new Gson();
+		String postJson = gson.toJson(gooodsList);
+		LogUtil.e("postJson", postJson+1);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("data", postJson);
+		OkHttpClientManager.postAsyn(AppClient.PostGoodInformations+userID, new ResultCallback<String>() {
+			@Override
+			public void onError(Request request, Exception e) {
+				// TODO Auto-generated method stub
+				Toast.makeText(getBaseContext(),"提交失败",0).show();
+			}
+			@Override
+			public void onResponse(String response) {
+				// TODO Auto-generated method stub
+				LogUtil.e("AdjustGoodsAct", response);
+				Toast.makeText(getBaseContext(),"提交成功",0).show();
+			}
+		}, params);
 	}
 	@SuppressWarnings("unused")
-	private void initData() {
+	private void getData() {
 		OkHttpClientManager.getAsyn(AppClient.GetGoodInformations+locationCode,new ResultCallback<AdjustGoodBean>() {
 			@Override
 			public void onError(Request request, Exception e) {
 				// TODO Auto-generated method stub
 				Toast.makeText(getBaseContext(),"获取商品信息失败",0).show();
-				
 			}
 			@Override
 			public void onResponse(AdjustGoodBean response) {
@@ -173,7 +448,9 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 					//开始按商品编码进行分类
 					list.clear();
 					goodsCodelist.clear();
-					goodClassificationByCode(response.DATA);
+					gooodsList=(ArrayList<Gooods>) response.DATA;
+					goodClassificationByCode(response.DATA,goodsCodelist,list);
+					myAdapter.list = list;
 					myAdapter.notifyDataSetChanged();
 					tv_huoweihao.setText("货位号:"+locationCode);
 				}else{
@@ -183,10 +460,23 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 		});
 	}
 	/**
-	 * 开始按商品编码进行分类
+	 * 获取当前显示的货位号
+	 * @param locationCode
+	 * @return
 	 */
-	protected void goodClassificationByCode(List<Gooods> data) {
+	public String getLocationCode(String locationCode){
+		locationCode = locationCode.substring(4);
+		LogUtil.e("AdjustGoodsAct",locationCode);
+		return locationCode;
+	}
+	/**
+	 * 开始按商品编码进行分类
+	 * @param list 
+	 */
+	protected void goodClassificationByCode(List<Gooods> data,List<String> goodsCodelist, ArrayList<ArrayList<Gooods>> list) {
 		// TODO Auto-generated method stub
+		goodsCodelist.clear();
+		list.clear();
 		for (int i = 0; i < data.size(); i++) {
 			if(!goodsCodelist.contains(data.get(i).GOODSCODE)){
 				goodsCodelist.add(data.get(i).GOODSCODE);
@@ -206,9 +496,11 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 	}
 	class MyAdapter extends BaseExpandableListAdapter{
 		
+		List<ArrayList<Gooods>> list;
 		
-		public MyAdapter() {
-			super();
+		public MyAdapter(List<ArrayList<Gooods>> list) {
+			// TODO Auto-generated method stub
+			this.list = list;
 		}
 		@Override
 		public int getGroupCount() {
@@ -242,7 +534,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
 			// TODO Auto-generated method stub
-			return 0;
+			return Long.parseLong(list.get(groupPosition).get(childPosition).GOODSBATCHCODE);
 		}
 
 		@Override
@@ -271,31 +563,51 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 			// TODO Auto-generated method stub
 			 ViewHolder holder = null;
 			 if (convertView == null) {
+				 //convertView= LayoutInflater.from(AdjustGoodsAct.this).inflate(R.layout.goodadjust_item, parent, true);
 	             convertView = View.inflate(mcontext, R.layout.goodadjust_item, null);
-	             holder = new ViewHolder();
+	             holder = new ViewHolder(convertView);
 	             holder.BatchNo = (TextView)convertView.findViewById(R.id.picihao);
 	             holder.big_unit = (TextView) convertView.findViewById(R.id.dadanwei);
 	             holder.small_unit = (TextView) convertView.findViewById(R.id.xiaodanwei);
+	             holder.tv_showBigUnits = (TextView) convertView.findViewById(R.id.tv_showBigUnits);
+	             holder.tv_showSmallUnits = (TextView) convertView.findViewById(R.id.tv_showSmallUnits);
 	             convertView.setTag(holder);
 	             }else{
 	            	 holder = (ViewHolder)convertView.getTag();
 	             }
+			 holder.rootView.setBackgroundResource(R.drawable.adjustact_expandlistview);
 			 holder.BatchNo.setText(list.get(groupPosition).get(childPosition).GOODSBATCHCODE);
 			 holder.big_unit.setText(list.get(groupPosition).get(childPosition).BuyQty+"");
 			 holder.small_unit.setText(list.get(groupPosition).get(childPosition).StoreQty+"");
+			 if(list.get(groupPosition).get(childPosition).PURUNITNAME.equals(list.get(groupPosition).get(childPosition).UNITNAME)){
+				 list.get(groupPosition).get(childPosition).UNITNAME = "——";
+			 }
+			 holder.tv_showBigUnits.setText("数量/"+list.get(groupPosition).get(childPosition).PURUNITNAME);
+			 holder.tv_showSmallUnits.setText("数量/"+list.get(groupPosition).get(childPosition).UNITNAME);
+			 if(longList.contains(getChildId(groupPosition, childPosition))){
+				 convertView.setBackgroundColor(Color.GREEN);
+			 }else{
+				 convertView.setBackgroundColor(Color.WHITE);
+			 }
 			 return convertView;
 		}
-
 		@Override
 		public boolean isChildSelectable(int groupPosition, int childPosition) {
 			// TODO Auto-generated method stub
 			return true;
 		}
-		
 	}
 	static class  ViewHolder {
+		
 		public TextView BatchNo;//批次号
 		public TextView big_unit;//大单位
 		public TextView small_unit;//小单位
+		public TextView tv_showBigUnits;//展示大单位
+		public TextView tv_showSmallUnits;//展示小单位
+		public View rootView;
+		public ViewHolder(View rootView){
+			this.rootView = rootView;
+		}
+		
 	}
 }

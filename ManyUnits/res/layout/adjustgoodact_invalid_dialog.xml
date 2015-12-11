@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_green_light"
+    android:gravity="center"
+    android:orientation="vertical" >
+    <TextView
+          android:layout_marginLeft="2dp"
+          android:id="@+id/title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="提示:是否继续盘点该批次商品?"
+          android:textColor="@android:color/black"
+          android:textSize="18sp"
+          />
+ 	<LinearLayout
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal"
+        android:weightSum="2"
+        >
+        <Button 
+            android:id="@+id/btn_ok"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+         	android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="是"
+            />
+        <Button 
+            android:id="@+id/btn_cancel"
+          	android:layout_width="0dp"
+            android:layout_height="wrap_content"
+         	android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="否"
+            />
+    </LinearLayout>
+</LinearLayout>

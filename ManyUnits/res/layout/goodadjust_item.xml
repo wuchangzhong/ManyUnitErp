@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/lv_goodAdjust"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/adjustact_expandlistview"
     android:orientation="vertical" >
-
     <LinearLayout
         android:id="@+id/title"
         android:layout_width="match_parent"
@@ -15,6 +15,7 @@
         android:weightSum="7" >
 
         <TextView
+            android:duplicateParentState="true"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
@@ -24,6 +25,8 @@
             android:textSize="14sp" />
 
         <TextView
+            android:duplicateParentState="true"
+            android:id="@+id/tv_showBigUnits"
             android:layout_width="0dp"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
@@ -33,6 +36,8 @@
             android:textSize="14sp" />
 
         <TextView
+            android:duplicateParentState="true"
+            android:id="@+id/tv_showSmallUnits"
             android:layout_width="0dp"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
@@ -50,6 +55,7 @@
         android:weightSum="7" >
 
         <TextView
+            android:duplicateParentState="true"
             android:id="@+id/picihao"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -58,8 +64,8 @@
             android:gravity="center"
             android:text="商品批次号"
             android:textSize="14sp" />
-
         <TextView
+            android:duplicateParentState="true"
             android:id="@+id/dadanwei"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -68,8 +74,8 @@
             android:text="数量/大单位"
             android:textColor="@android:color/black"
             android:textSize="14sp" />
-
         <TextView
+            android:duplicateParentState="true"
             android:id="@+id/xiaodanwei"
             android:textColor="@android:color/black"
             android:layout_width="0dp"

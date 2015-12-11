@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/holo_green_light"
+    android:gravity="center"
     android:orientation="vertical" >
   <LinearLayout 
       android:orientation="horizontal"
@@ -11,6 +12,8 @@
       android:gravity="center_vertical"
       >
       <TextView
+          android:layout_marginLeft="2dp"
+          android:id="@+id/tv_big"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:text="大单位:"
@@ -25,14 +28,16 @@
         android:layout_marginTop="8dip"
         android:hint="0" />
   </LinearLayout>
-    
-    <LinearLayout 
+    <LinearLayout
+      android:id="@+id/small"
       android:orientation="horizontal"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:gravity="center_vertical"
       >
       <TextView 
+          android:layout_marginLeft="2dp"
+          android:id="@+id/tv_small"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:text="小单位:"
@@ -48,33 +53,40 @@
         android:hint="0" />
   </LinearLayout>
   
-    <RelativeLayout
+    <LinearLayout
         android:layout_marginTop="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 
+        android:orientation="horizontal"
+        android:weightSum="3"
         >
         <Button 
             android:id="@+id/btn_ok"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="8dip"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
+         	android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:text="确定"
+            />
+         <Button 
+            android:id="@+id/btn_invalid "
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+         	android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="作废"
             />
         <Button 
             android:id="@+id/btn_cancel"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:layout_width="wrap_content"
+          	android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="8dip"
+         	android:layout_weight="1"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:text="取消"
             />
-    </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>

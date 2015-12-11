@@ -38,22 +38,104 @@
                 android:text="确认" />
             </LinearLayout>
         </LinearLayout>
-
+        
+	<LinearLayout
+	    android:id="@+id/lv_huoweihao_tijiao"
+	    android:layout_below="@id/lv_sweepcode"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:background="@drawable/bg_line_selected"
+	    android:weightSum="4"
+	    >
         <TextView
-            android:layout_below="@id/lv_sweepcode"
             android:id="@+id/tv_huoweihao"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:background="@drawable/bg_line_selected"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
             android:gravity="center_vertical"
             android:text="货位号:"
             android:textColor="@android:color/black"
             android:textSize="20sp" />
- 		<ExpandableListView
- 		    	android:layout_below="@id/tv_huoweihao"
-                android:id="@+id/listview_showinformation"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible" >
-         </ExpandableListView>
+        <Button
+            android:id="@+id/summit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:text="提交"
+            android:textColor="@android:color/black" />
+   </LinearLayout>
+   <LinearLayout
+       android:weightSum="2"
+       android:id="@+id/lv_partition"
+       android:layout_below="@id/lv_huoweihao_tijiao"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="5dp"
+       android:orientation="horizontal">
+       <LinearLayout
+           android:layout_weight="1"
+           android:id="@+id/lv_TakingInventoryArea"
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:clickable="true"
+           android:gravity="center"
+           android:orientation="vertical">
+           <TextView
+               android:id="@+id/tv_TakingInventoryArea"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:textColor="@color/green"
+               android:text="盘货区"
+               android:textSize="20sp"/>
+           <ImageView
+               android:id="@+id/iv_TakingInventoryArea"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="5dp"
+               android:background="@drawable/time_line_bg"/>
+       </LinearLayout>
+       <LinearLayout
+           android:id="@+id/lv_MistakenDeleteArea"
+           android:gravity="center"
+           android:layout_weight="1"
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:clickable="true"
+           android:orientation="vertical" >
+           <TextView
+               android:id="@+id/tv_MistakenDeleteArea"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="作废区"
+               android:textColor="@android:color/black"
+               android:textSize="20sp"/>
+           <ImageView
+               android:id="@+id/iv_MistakenDeletAarea"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="5dp"
+               android:background="@drawable/time_line_bg"
+               android:visibility="invisible" />
+       </LinearLayout>
+   </LinearLayout>
+   <FrameLayout
+        android:layout_marginTop="5dp"
+       	android:id="@+id/show"
+       	android:layout_below="@id/lv_partition"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <ExpandableListView
+            android:id="@+id/listview_showinformation"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+        </ExpandableListView>
+        <ExpandableListView 
+            android:visibility="gone"
+            android:id="@+id/listview_MistakenDeleteInformation"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </ExpandableListView>
+   </FrameLayout>
 </RelativeLayout>
