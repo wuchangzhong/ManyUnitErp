@@ -52,5 +52,4 @@ public class Act_main_function extends BaseAdapter {
 		text_desc.setText(functions[position]);
 		return erp_functions;
 	}
-
 }

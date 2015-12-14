@@ -88,7 +88,6 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 	private ArrayList<String> invalidGoodsCodeList = new ArrayList<String>();//作废商品总类的集合
 	private ArrayList<ArrayList<Gooods>> invalidList = new ArrayList<>();//存放每种作废商品的集合
 	
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,6 +95,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 		initView();
 		mcontext = this;
 		userID = SharePreUtil.getInteger(mcontext,"userID",-1);
+		LogUtil.e("AdjustGoodsAct",userID+"");
 		setListener();
 	}
 	/**
@@ -379,18 +379,23 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 					// TODO Auto-generated method stub
 					Toast.makeText(getBaseContext(),"获取作废区商品参数失败",0).show();
 					invalidGoods.clear();
+					//对所有作废商品进行分类
+					goodClassificationByCode(invalidGoods,invalidGoodsCodeList, invalidList);
+					myAdapterInvalid.list = invalidList;
+					myAdapterInvalid.notifyDataSetChanged();
 				}
 				@Override
 				public void onResponse(AdjustGoodBean response) {
 					// TODO Auto-generated method stub
 					invalidGoods = (ArrayList<Gooods>) response.DATA;
 					Toast.makeText(getBaseContext(),"获取作废区商品参数成功",0).show();
+					//对所有作废商品进行分类
+					goodClassificationByCode(invalidGoods,invalidGoodsCodeList, invalidList);
+					myAdapterInvalid.list = invalidList;
+					myAdapterInvalid.notifyDataSetChanged();
 				}
 			});
-			//对所有作废商品进行分类
-			goodClassificationByCode(invalidGoods,invalidGoodsCodeList, invalidList);
-			myAdapterInvalid.list = invalidList;
-			myAdapterInvalid.notifyDataSetChanged();
+			
 			break;
 		case R.id.summit://提交操作
 			postData();
@@ -405,10 +410,20 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 	private void postData(){
 		Gson gson = new Gson();
 		String postJson = gson.toJson(gooodsList);
-		LogUtil.e("postJson", postJson+1);
-		Map<String, String> params = new HashMap<String, String>();
+		LogUtil.e("postJson", postJson);
+		try {
+			File fp = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "wochu.txt");
+			FileWriter pw = new FileWriter(fp);
+			pw.write(postJson);
+			pw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String,String> params = new HashMap<String, String>();
 		params.put("data", postJson);
-		OkHttpClientManager.postAsyn(AppClient.PostGoodInformations+userID, new ResultCallback<String>() {
+		params.put("userId",String.valueOf(userID));
+		OkHttpClientManager.postAsyn(AppClient.PostGoodInformations, new ResultCallback<String>() {
 			@Override
 			public void onError(Request request, Exception e) {
 				// TODO Auto-generated method stub

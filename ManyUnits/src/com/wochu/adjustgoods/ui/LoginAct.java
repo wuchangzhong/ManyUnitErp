@@ -5,10 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.squareup.okhttp.Request;
 import com.wochu.adjustgoods.R;
@@ -86,7 +91,7 @@ public class LoginAct extends Activity implements OnClickListener{
 			@Override
 			public void onError(Request request, Exception e) {
 				// TODO Auto-generated method stub
-				Toast.makeText(getBaseContext(),"登录失败",0).show();
+				showMyToast("登录失败！","服务器无响应！");
 					}
 					@Override
 			 public void onResponse(UserInfo response) {
@@ -97,7 +102,7 @@ public class LoginAct extends Activity implements OnClickListener{
 							SharePreUtil.putInteger(mcontext, "userID",response.DATA.USERID);// 保存工人的账号
 							toMainAct();
 						} else {
-							Toast.makeText(getBaseContext(), "登录失败", 0).show();
+							showMyToast("登录失败！","请检查用户名或密码");
 						}
 					}
 				});
@@ -109,5 +114,24 @@ public class LoginAct extends Activity implements OnClickListener{
 		}
 		startActivity(intent);
 		finish();
+	}
+	
+	
+	private void showMyToast(String title,String content){
+		LayoutInflater inflater = getLayoutInflater();
+		   View layout = inflater.inflate(R.layout.mytoast,
+		     (ViewGroup) findViewById(R.id.llToast));
+		   ImageView image = (ImageView) layout
+		     .findViewById(R.id.tvImageToast);
+		   image.setImageResource(R.drawable.warn);
+		   TextView tv_title = (TextView) layout.findViewById(R.id.tvTitleToast);
+		   tv_title.setText(title);
+		   TextView text = (TextView) layout.findViewById(R.id.tvTextToast);
+		   text.setText(content);
+		   Toast toast = new Toast(getApplicationContext());
+		   toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 12, 40);
+		   toast.setDuration(Toast.LENGTH_SHORT);
+		   toast.setView(layout);
+		   toast.show();
 	}
 }

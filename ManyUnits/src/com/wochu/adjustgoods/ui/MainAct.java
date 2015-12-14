@@ -11,6 +11,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import com.wochu.adjustgoods.R;
 import com.wochu.adjustgoods.adapter.Act_main_function;
+import com.wochu.adjustgoods.ui.PickingFinishedGoods.pickfinishedgoods_weijianqu;
 
 public class MainAct extends Activity {
 	private GridView gv_functions;
@@ -41,6 +42,31 @@ public class MainAct extends Activity {
 				case 1:
 					Intent intent2 = new Intent(MainAct.this,AdjustGoodsAct.class);
 					startActivity(intent2);
+					break;
+				case 2:
+					Intent intent3 = new Intent(MainAct.this,PickingFinishedGoods.class);
+					startActivity(intent3);
+					break;
+				case 3:
+					Intent intent4 = new Intent(MainAct.this,SortingAct.class);
+					startActivity(intent4);
+					break;
+				case 4:
+					Intent intent5 = new Intent(MainAct.this,RecheckAct.class);
+					startActivity(intent5);
+					break;
+				case 5:
+					Intent intent6 = new Intent(MainAct.this,PrintAct.class);
+					startActivity(intent6);
+					break;
+				case 6:
+					Intent intent7 = new Intent(MainAct.this,DebindFboxAct.class);
+					startActivity(intent7);
+					break;
+				case 7:
+					Intent intent8 = new Intent(MainAct.this,WeightingAct.class);
+					startActivity(intent8);
+					break;
 				default:
 					break;
 				}
@@ -51,7 +77,7 @@ public class MainAct extends Activity {
 	private void initData() {
 		functions = getResources().getStringArray(R.array.ERP_Function); 
 		imageResources = new int[] {R.drawable.th_xplane,R.drawable.th_xplane_blue,R.drawable.th_xplane_green,
-				R.drawable.th_xplane_purple,R.drawable.th_xplane_red,R.drawable.th_camera};
+				R.drawable.th_xplane_red,R.drawable.th_xplane_bluealt,R.drawable.th_notesalt,R.drawable.th_xplane_blue,R.drawable.th_xplane};
 		act_main_function = new Act_main_function(this,functions,imageResources); 
 		gv_functions.setAdapter(act_main_function);
 	}

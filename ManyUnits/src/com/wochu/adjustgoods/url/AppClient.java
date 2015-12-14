@@ -17,7 +17,7 @@ public class AppClient {
 	//获取货位商品信息地址
 	public static final String GetGoodInformations = "http://116.228.118.218:10098/InventoryAdjustment/GetLocationInventory?LocCode=";
 	//库存盘点商品信息提交地址
-	public static final String PostGoodInformations = "http://116.228.118.218:10098/InventoryAdjustment/UpdateLocationInventory?UserID=";
+	public static final String PostGoodInformations = "http://116.228.118.218:10098/InventoryAdjustment/UpdateLocationInventory";
 	//库存盘点提交作废商品地址
 	public static final String PostInvalidGood = "http://116.228.118.218:10098/InventoryAdjustment/UpdateLocationInventoryStatus?";
 	//库存盘点作废区地址

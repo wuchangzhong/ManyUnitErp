@@ -20,13 +20,16 @@
         	android:layout_height="wrap_content"
             android:id="@+id/tv_huoweihao"
             style="@style/goodsquery"
+            android:textColor="@color/black"
             android:text="货位号:" />
-
+        
         <TextView
             android:layout_width="match_parent"
         	android:layout_height="wrap_content"
             android:id="@+id/tv_goodscode"
             android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:textSize="18sp"
             android:text="商品编码:"/>
 
         <TextView
@@ -34,6 +37,8 @@
         	android:layout_height="wrap_content"
             android:id="@+id/tv_goodsname"
             android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:textSize="18sp"
             android:text="商品名称:" />
     </LinearLayout>
 

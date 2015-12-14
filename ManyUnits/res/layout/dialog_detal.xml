@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" 
+    >
+    
+ <LinearLayout 
+       
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        >
+<TextView 
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:text="订单号:"
+    android:gravity="center_horizontal"
+    android:textSize="22sp"
+    />
+    <TextView 
+        android:id="@+id/tv_orderNum"
+         android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:gravity="start"
+    android:text="123456789"
+    android:textSize="18sp"
+        />
+    
+    </LinearLayout>
+    <LinearLayout 
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        >
+        <TextView 
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:text="发货数:"
+    android:gravity="center_horizontal"
+    android:textSize="22sp"
+    />
+    <TextView 
+        android:id="@+id/tv_orderCount"
+         android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:gravity="start"
+    android:text="123456789"
+    android:textSize="20sp"
+        />
+    </LinearLayout>
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        
+              <TextView 
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:text="实检数:"
+    android:gravity="center_horizontal"
+    android:textSize="22sp"
+    />
+                <TextView 
+        android:id="@+id/tv_actuallyCount"
+         android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:gravity="start"
+    android:text="123456789"
+    android:textSize="20sp"
+        />
+    </LinearLayout>
+    
+</LinearLayout>

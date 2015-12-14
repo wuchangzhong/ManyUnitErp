@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- 我厨绿色 -->
     <color name="green">#48B033</color> <!-- 基础绿色 -->
     <!-- 基础颜色 -->
@@ -49,14 +48,6 @@
     <color name="text_coupon_grey">#929292</color> <!-- dot线灰色 -->
     <color name="text_recharge">#515151</color> <!-- 充值文字灰色 -->
     <color name="line_recharge">#a4a4a4</color> <!-- 充值文字灰色 -->
-    <!-- zxing barcode colors -->
-    <color name="possible_result_points">#c0ffff00</color>
-    <color name="result_view">#b0000000</color>
-    <color name="viewfinder_mask">#60000000</color>
-    <color name="lightgreen">#99CC33</color>
-    <color name="line_septal">#ccc9c9 </color>
-    <color name="my_wuchu_below">#9F9F9F</color> <!-- 我的——全部订单——字体颜色（淡灰色） -->
-    <color name="user_finish_tv">#F47D30</color>
     <!-- 亮灰色 -->
     <color name="lightgrey">#f3f3f3</color>
     <color name="major">#666666</color>
@@ -68,5 +59,18 @@
 
     <!-- 通用背景颜色 -->
     <color name="background_base">#faf8f6</color> <!-- 通用背景颜色 -->
-	<color name="green_base">#55ba42</color> <!-- 新绿色 -->
+    <color name="green_base">#55ba42</color> <!-- 新绿色 -->
+    
+    <color name="contents_text">#ff000000</color>
+    <color name="encode_view">#ffffffff</color>
+    <color name="possible_result_points">#c0ffbd21</color> <!-- Android standard ICS color -->
+    <color name="result_minor_text">#ffc0c0c0</color>
+    <color name="result_points">#c099cc00</color> <!-- Android standard ICS color -->
+    <color name="result_text">#ffffffff</color>
+    <color name="result_view">#b0000000</color>
+    <color name="status_text">#ffffffff</color>
+    <color name="transparent">#00000000</color>
+    <color name="viewfinder_laser">#ffcc0000</color> <!-- Android standard ICS color -->
+    <color name="viewfinder_mask">#60000000</color>
+    <color name="viewfinder_frame">#ff88ae00</color>
 </resources>

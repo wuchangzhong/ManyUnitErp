@@ -4,5 +4,10 @@
         <item>货位查询</item> 
         <item>库存盘点</item>  
         <item>成品拣货</item>
+        <item>订单复核</item>
+        <item>详细核单</item>
+        <item>单据打印</item>
+        <item>回收功能</item>
+        <item>称重功能</item>
     </string-array>
 </resources>

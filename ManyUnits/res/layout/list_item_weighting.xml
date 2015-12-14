@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+    <LinearLayout 
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+      	android:orientation="horizontal"
+      	android:layout_weight="7"
+      	android:gravity="center"
+        >
+     <TextView 
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+	    android:id="@+id/Product_code"
+	    android:layout_weight="3"
+	    android:layout_height="wrap_content"
+	    android:layout_width="0dp"
+	    android:gravity="center"
+	    android:textSize="16sp"
+	    android:text="商品编号"
+	    />
+	<TextView 
+	    android:layout_margin="0dp"
+	    android:gravity="center"
+	    android:id="@+id/Product_name"
+	    android:layout_weight="3"
+	    android:layout_height="wrap_content"
+	    android:layout_width="0dp"
+	    android:textSize="16sp"
+	    android:text="商品名称"
+	    />
+	<TextView 
+	    android:gravity="center"
+	    android:id="@+id/Product_weight"
+	    android:layout_weight="2"
+	    android:layout_height="wrap_content"
+	    android:layout_width="0dp"
+	    android:text="商品重量"
+	    android:textSize="16sp"
+	    />
+    </LinearLayout>
+</LinearLayout>
