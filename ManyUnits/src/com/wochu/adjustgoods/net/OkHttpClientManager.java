@@ -153,6 +153,12 @@ import java.util.Set;
 	        Request request = buildPostRequest(url, params);
 	        deliveryResult(callback, request);
 	    }
+	    
+	    private void _postAsyn(String url, final ResultCallback callback, String params)
+	    {
+	        Request request = buildPostRequest(url, params);
+	        deliveryResult(callback, request);
+	    }
 
 	    /**
 	     * 异步的post请求
@@ -164,7 +170,7 @@ import java.util.Set;
 	    private void _postAsyn(String url, final ResultCallback callback, Map<String, String> params)
 	    {
 	        Param[] paramsArr = map2Params(params);
-	        Request request = buildPostRequest(url, paramsArr);
+	        Request request = buildPostRequest(url, paramsArr, params.toString());
 	        deliveryResult(callback, request);
 	    }
 
@@ -425,8 +431,12 @@ import java.util.Set;
 	    {
 	        getInstance()._postAsyn(url, callback, params);
 	    }
-
-
+	    
+	    public static void postAsyn(String url, final ResultCallback callback, String params)
+	    {
+	        getInstance()._postAsyn(url, callback, params);
+	    }
+	    
 	    public static void postAsyn(String url, final ResultCallback callback, Map<String, String> params)
 	    {
 	        getInstance()._postAsyn(url, callback, params);
@@ -559,12 +569,15 @@ import java.util.Set;
 
 	    private void deliveryResult(final ResultCallback callback, Request request)
 	    {
+	    	callback.onBefore(request);
 	        mOkHttpClient.newCall(request).enqueue(new Callback()
 	        {
 	            @Override
 	            public void onFailure(final Request request, final IOException e)
 	            {
-	                sendFailedStringCallback(request, e, callback);
+	                //sendFailedStringCallback(request, e, callback);
+	            	callback.onError(request, e);
+	                callback.onAfter();
 	            }
 
 	            @Override
@@ -604,6 +617,7 @@ import java.util.Set;
 	            {
 	                if (callback != null)
 	                    callback.onError(request, e);
+	                	callback.onAfter();
 	            }
 	        });
 	    }
@@ -618,12 +632,14 @@ import java.util.Set;
 	                if (callback != null)
 	                {
 	                    callback.onResponse(object);
+	                    callback.onAfter();
 	                }
 	            }
 	        });
 	    }
 
-	    private Request buildPostRequest(String url, Param[] params)
+	    @SuppressWarnings("static-access")
+		private Request buildPostRequest(String url, Param[] params)
 	    {
 	        if (params == null)
 	        {
@@ -634,7 +650,37 @@ import java.util.Set;
 	        {
 	            builder.add(param.key, param.value);
 	        }
-	        RequestBody requestBody = builder.build();
+	        RequestBody requestBody = builder.build().create(MediaType.parse("application/json; charset=utf-8"), "json");
+	        return new Request.Builder()
+	                .url(url)
+	                .post(requestBody)
+	                .build();
+	    }
+	    
+		private Request buildPostRequest(String url, String params)
+	    {
+	   
+	        FormEncodingBuilder builder = new FormEncodingBuilder();
+	    
+	        RequestBody requestBody = builder.build().create(MediaType.parse("application/json; charset=utf-8"), params);
+	        return new Request.Builder()
+	                .url(url)
+	                .post(requestBody)
+	                .build();
+	    }
+	    
+	    private Request buildPostRequest(String url, Param[] params, String content)
+	    {
+	        if (params == null)
+	        {
+	            params = new Param[0];
+	        }
+	        FormEncodingBuilder builder = new FormEncodingBuilder();
+	        for (Param param : params)
+	        {
+	            builder.add(param.key, param.value);
+	        }
+	        RequestBody requestBody = builder.build().create(MediaType.parse("application/json; charset=utf-8"), content);
 	        return new Request.Builder()
 	                .url(url)
 	                .post(requestBody)
@@ -661,7 +707,9 @@ import java.util.Set;
 	            ParameterizedType parameterized = (ParameterizedType) superclass;
 	            return $Gson$Types.canonicalize(parameterized.getActualTypeArguments()[0]);
 	        }
+	        public void onBefore(Request request) {};//访问网络开始
 
+			public void onAfter() {};//访问网络结束
 	        public abstract void onError(Request request, Exception e);
 
 	        public abstract void onResponse(T response);

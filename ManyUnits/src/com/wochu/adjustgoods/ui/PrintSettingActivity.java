@@ -2,27 +2,43 @@ package com.wochu.adjustgoods.ui;
 
 
 
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import com.wochu.adjustgoods.R;
+import com.wochu.adjustgoods.printer.Device;
+import com.wochu.adjustgoods.printer.PrintService;
+import com.wochu.adjustgoods.printer.PrinterClass;
+import com.wochu.adjustgoods.printer.PrinterClassFactory;
 
 import zpSDK.zpSDK.zpSDK;
-import android.app.AlertDialog;
-import android.app.ListActivity;
-import android.bluetooth.BluetoothAdapter;
-//import android.bluetooth.BluetoothClass.Device;
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+
+
+
+
+
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -30,12 +46,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.wochu.adjustgoods.R;
-import com.wochu.adjustgoods.printer.Device;
-import com.wochu.adjustgoods.printer.PrintService;
-import com.wochu.adjustgoods.printer.PrinterClass;
-import com.wochu.adjustgoods.printer.PrinterClassFactory;
 
 //zkc.bluetooth.api
 

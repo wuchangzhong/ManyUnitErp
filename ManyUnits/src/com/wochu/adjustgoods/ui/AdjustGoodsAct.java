@@ -13,6 +13,7 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.squareup.okhttp.Request;
 import com.wochu.adjustgoods.R;
+import com.wochu.adjustgoods.base.BaseActivity;
 import com.wochu.adjustgoods.bean.AdjustGoodBean;
 import com.wochu.adjustgoods.bean.AdjustGoodBean.Gooods;
 import com.wochu.adjustgoods.bean.GoodsQuery.GoodsBean;
@@ -25,7 +26,9 @@ import com.wochu.adjustgoods.utils.SharePreUtil;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
@@ -53,7 +56,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class AdjustGoodsAct extends Activity implements OnClickListener{
+public class AdjustGoodsAct extends BaseActivity implements OnClickListener{
 	private Button btn_trance_orderNumber;
 	private EditText et_code;
 	private Button btn_confirm;
@@ -74,6 +77,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 	private ImageView iv_MistakenDeletAarea;
 	private ExpandableListView listview_MistakenDeleteInformation;
 	private Button btn_invalid;
+	private BroadcastReceiver receiver;
 	/**
 	 *盘货区集合
 	 */
@@ -97,6 +101,22 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 		userID = SharePreUtil.getInteger(mcontext,"userID",-1);
 		LogUtil.e("AdjustGoodsAct",userID+"");
 		setListener();
+		receiver = new BroadcastReceiver() {
+			
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				// TODO Auto-generated method stub
+				String action = intent.getAction();
+				if(action.equals("com.android.scanservice.scancontext")){
+					locationCode = intent.getStringExtra("Scan_context");//获得扫码值
+					if(!TextUtils.isEmpty(locationCode)&&(!"".equals(locationCode))){
+						getData();
+						return;
+					}
+					Toast.makeText(getBaseContext(),"请先扫描货位号",0).show();
+				}
+			}
+		};
 	}
 	/**
 	 * 初始化
@@ -115,9 +135,9 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 		tv_huoweihao = (TextView) findViewById(R.id.tv_huoweihao);
 		listview_showinformation = (ExpandableListView) findViewById(R.id.listview_showinformation);
 		listview_MistakenDeleteInformation = (ExpandableListView) findViewById(R.id.listview_MistakenDeleteInformation);
-		myAdapter = new MyAdapter(list);
+		myAdapter = new MyAdapter(list,0);
 		listview_showinformation.setAdapter(myAdapter);
-		myAdapterInvalid = new MyAdapter(invalidList);
+		myAdapterInvalid = new MyAdapter(invalidList,1);
 		listview_MistakenDeleteInformation.setAdapter(myAdapterInvalid);
 		listview_showinformation.setGroupIndicator(null);//将控件默认的左边箭头去掉
 		listview_MistakenDeleteInformation.setGroupIndicator(null);
@@ -137,6 +157,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 						// TODO Auto-generated method stub
 						showPickdialog(v, groupPosition, childPosition, id);
 						v.setBackgroundColor(Color.GREEN);
+						if(!longList.contains(id)){
 						handler.postDelayed(new Runnable() {
 							@Override
 							public void run() {
@@ -144,7 +165,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 								v.setBackgroundColor(Color.WHITE);
 							}
 						}, 500);
-
+					}
 						return true;
 					}
 				});
@@ -171,7 +192,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 						Button btn_cancel = (Button) dialog
 								.findViewById(R.id.btn_cancel);
 						btn_ok.setOnClickListener(new OnClickListener() {
-
+							
 							@Override
 							public void onClick(View v) {
 								// TODO Auto-generated method stub
@@ -180,11 +201,19 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 							gooodsList= new ArrayList<AdjustGoodBean.Gooods>();
 							gooodsList.add(goods);
 							goodsCodelist.clear();
+							longList.clear();
 							list.clear();
 							//分类操作
 							goodClassificationByCode(gooodsList, goodsCodelist, list);
-							myAdapter.list = list;
+							
+							myAdapter.listAdapter = list.subList(0, 1);
+							LogUtil.e("123",myAdapter.listAdapter.size()+"");
 							myAdapter.notifyDataSetChanged();
+							int count = listview_showinformation.getCount();
+							for (int i=0; i<count; i++)  
+							 {   
+								listview_showinformation.collapseGroup(i);  
+							 };   
 							tv_TakingInventoryArea.setTextColor(Color.GREEN);
 							iv_TakingInventoryArea.setVisibility(View.VISIBLE);
 							listview_MistakenDeleteInformation.setVisibility(View.INVISIBLE);
@@ -192,11 +221,11 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 							iv_MistakenDeletAarea.setVisibility(View.INVISIBLE);
 							listview_showinformation.setVisibility(View.VISIBLE);
 							dialog.dismiss();
-							tv_huoweihao.setText("货位号:"+myAdapter.list.get(0).get(0).LOCATIONCODE);
+							tv_huoweihao.setText("货位号:"+myAdapter.listAdapter.get(0).get(0).LOCATIONCODE);
 							}
 						});
 						btn_cancel.setOnClickListener(new OnClickListener() {
-
+							
 							@Override
 							public void onClick(View v) {
 								// TODO Auto-generated method stub
@@ -293,7 +322,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 				Gooods gooods = list.get(groupPosition).get(childPosition);
 				list.get(groupPosition).remove(gooods);
 				list.get(groupPosition).add(gooods);
-				myAdapter.list = list;
+				myAdapter.listAdapter = list;
 				myAdapter.notifyDataSetChanged();
 				view.setBackgroundColor(Color.GREEN);
 				if(!longList.contains(id)){
@@ -348,9 +377,14 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 			locationCode = et_code.getText().toString();
 			if(!TextUtils.isEmpty(locationCode)&&(!"".equals(locationCode))){
 				getData();
+				longList.clear();
 				return;
 			}
 			Toast.makeText(getBaseContext(),"请先扫描货位号",0).show();
+			break;
+		case R.id.btn_trance_orderNumber:
+			Intent intent = new Intent("android.intent.action.FUNCTION_BUTTON_DOWN");
+			sendBroadcast(intent);//发送广播
 			break;
 		case R.id.lv_TakingInventoryArea://盘货区
 			tv_TakingInventoryArea.setTextColor(Color.GREEN);
@@ -375,14 +409,21 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 			OkHttpClientManager.getAsyn(AppClient.getInvalidGoodInformations(getLocationCode(tv_huoweihao.getText().toString()),0),new ResultCallback<AdjustGoodBean>() {
 				
 				@Override
+				public void onBefore(Request request) {//开始访问
+					// TODO Auto-generated method stub
+					super.onBefore(request);
+					showLoadingDialog("数据加载中");
+				}
+				@Override
 				public void onError(Request request, Exception e) {
 					// TODO Auto-generated method stub
 					Toast.makeText(getBaseContext(),"获取作废区商品参数失败",0).show();
 					invalidGoods.clear();
 					//对所有作废商品进行分类
 					goodClassificationByCode(invalidGoods,invalidGoodsCodeList, invalidList);
-					myAdapterInvalid.list = invalidList;
+					myAdapterInvalid.listAdapter = invalidList;
 					myAdapterInvalid.notifyDataSetChanged();
+					hideLoadingDialog();
 				}
 				@Override
 				public void onResponse(AdjustGoodBean response) {
@@ -391,8 +432,14 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 					Toast.makeText(getBaseContext(),"获取作废区商品参数成功",0).show();
 					//对所有作废商品进行分类
 					goodClassificationByCode(invalidGoods,invalidGoodsCodeList, invalidList);
-					myAdapterInvalid.list = invalidList;
+					myAdapterInvalid.listAdapter = invalidList;
 					myAdapterInvalid.notifyDataSetChanged();
+				}
+				@Override
+				public void onAfter() {//访问结束
+					// TODO Auto-generated method stub
+					super.onAfter();
+					hideLoadingDialog();
 				}
 			});
 			
@@ -420,14 +467,19 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Map<String,String> params = new HashMap<String, String>();
-		params.put("data", postJson);
-		params.put("userId",String.valueOf(userID));
-		OkHttpClientManager.postAsyn(AppClient.PostGoodInformations, new ResultCallback<String>() {
+		OkHttpClientManager.postAsyn(AppClient.PostGoodInformations+userID, new ResultCallback<String>() {
+			
+			@Override
+			public void onBefore(Request request) {
+				// TODO Auto-generated method stub
+				super.onBefore(request);
+				showLoadingDialog("数据提交中");
+			}
 			@Override
 			public void onError(Request request, Exception e) {
 				// TODO Auto-generated method stub
 				Toast.makeText(getBaseContext(),"提交失败",0).show();
+				hideLoadingDialog();
 			}
 			@Override
 			public void onResponse(String response) {
@@ -435,11 +487,24 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 				LogUtil.e("AdjustGoodsAct", response);
 				Toast.makeText(getBaseContext(),"提交成功",0).show();
 			}
-		}, params);
+			@Override
+			public void onAfter() {
+				// TODO Auto-generated method stub
+				super.onAfter();
+				hideLoadingDialog();
+			}
+		}, postJson.toString());
 	}
 	@SuppressWarnings("unused")
 	private void getData() {
 		OkHttpClientManager.getAsyn(AppClient.GetGoodInformations+locationCode,new ResultCallback<AdjustGoodBean>() {
+			
+			@Override
+			public void onBefore(Request request) {
+				// TODO Auto-generated method stub
+				super.onBefore(request);
+				showLoadingDialog("数据加载中");
+			}
 			@Override
 			public void onError(Request request, Exception e) {
 				// TODO Auto-generated method stub
@@ -465,12 +530,18 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 					goodsCodelist.clear();
 					gooodsList=(ArrayList<Gooods>) response.DATA;
 					goodClassificationByCode(response.DATA,goodsCodelist,list);
-					myAdapter.list = list;
+					myAdapter.listAdapter = list;
 					myAdapter.notifyDataSetChanged();
 					tv_huoweihao.setText("货位号:"+locationCode);
 				}else{
 					Toast.makeText(getBaseContext(),"获取商品信息失败",0).show();
 				}
+			}
+			@Override
+			public void onAfter() {
+				// TODO Auto-generated method stub
+				super.onAfter();
+				hideLoadingDialog();
 			}
 		});
 	}
@@ -511,33 +582,35 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 	}
 	class MyAdapter extends BaseExpandableListAdapter{
 		
-		List<ArrayList<Gooods>> list;
+		public int flag =0;
+		List<ArrayList<Gooods>> listAdapter = new ArrayList<ArrayList<Gooods>>();
 		
-		public MyAdapter(List<ArrayList<Gooods>> list) {
+		public MyAdapter(List<ArrayList<Gooods>> list,int flag) {
 			// TODO Auto-generated method stub
-			this.list = list;
+			this.listAdapter = list;
+			this.flag = flag;
 		}
 		@Override
 		public int getGroupCount() {
 			// TODO Auto-generated method stub
-			return list.size();
+			return listAdapter.size();
 		}
 		@Override
 		public int getChildrenCount(int groupPosition) {
 			// TODO Auto-generated method stub
-			return list.get(groupPosition).size();
+			return listAdapter.get(groupPosition).size();
 		}
-
+		
 		@Override
 		public Object getGroup(int groupPosition) {
 			// TODO Auto-generated method stub
-			return list.get(groupPosition);
+			return listAdapter.get(groupPosition);
 		}
 
 		@Override
 		public Object getChild(int groupPosition, int childPosition) {
 			// TODO Auto-generated method stub
-			return list.get(groupPosition).get(childPosition);
+			return listAdapter.get(groupPosition).get(childPosition);
 		}
 
 		@Override
@@ -549,7 +622,7 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
 			// TODO Auto-generated method stub
-			return Long.parseLong(list.get(groupPosition).get(childPosition).GOODSBATCHCODE);
+			return Long.parseLong(listAdapter.get(groupPosition).get(childPosition).GOODSBATCHCODE);
 		}
 
 		@Override
@@ -565,9 +638,9 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 			View goodclassbycode_item = View.inflate(mcontext,R.layout.goodclassbycode_item,null);
 			TextView goodsCode = (TextView) goodclassbycode_item.findViewById(R.id.goodsCode);
 			TextView goodsName = (TextView) goodclassbycode_item.findViewById(R.id.goodsName);
-			if(list.get(groupPosition).size()>0){
-			goodsCode.setText("商品编码:"+list.get(groupPosition).get(0).GOODSCODE);
-			goodsName.setText("商品名称:"+list.get(groupPosition).get(0).GOODSNAME);
+			if(listAdapter.get(groupPosition).size()>0){
+			goodsCode.setText("商品编码:"+listAdapter.get(groupPosition).get(0).GOODSCODE);
+			goodsName.setText("商品名称:"+listAdapter.get(groupPosition).get(0).GOODSNAME);
 		}
 			return goodclassbycode_item;
 		}
@@ -591,19 +664,23 @@ public class AdjustGoodsAct extends Activity implements OnClickListener{
 	            	 holder = (ViewHolder)convertView.getTag();
 	             }
 			 holder.rootView.setBackgroundResource(R.drawable.adjustact_expandlistview);
-			 holder.BatchNo.setText(list.get(groupPosition).get(childPosition).GOODSBATCHCODE);
-			 holder.big_unit.setText(list.get(groupPosition).get(childPosition).BuyQty+"");
-			 holder.small_unit.setText(list.get(groupPosition).get(childPosition).StoreQty+"");
-			 if(list.get(groupPosition).get(childPosition).PURUNITNAME.equals(list.get(groupPosition).get(childPosition).UNITNAME)){
-				 list.get(groupPosition).get(childPosition).UNITNAME = "——";
+			 holder.BatchNo.setText(listAdapter.get(groupPosition).get(childPosition).GOODSBATCHCODE);
+			 holder.big_unit.setText(listAdapter.get(groupPosition).get(childPosition).BuyQty+"");
+			 holder.small_unit.setText(listAdapter.get(groupPosition).get(childPosition).StoreQty+"");
+			 if(listAdapter.get(groupPosition).get(childPosition).PURUNITNAME.equals(listAdapter.get(groupPosition).get(childPosition).UNITNAME)){
+				 listAdapter.get(groupPosition).get(childPosition).UNITNAME = "——";
 			 }
-			 holder.tv_showBigUnits.setText("数量/"+list.get(groupPosition).get(childPosition).PURUNITNAME);
-			 holder.tv_showSmallUnits.setText("数量/"+list.get(groupPosition).get(childPosition).UNITNAME);
+			 holder.tv_showBigUnits.setText("数量/"+listAdapter.get(groupPosition).get(childPosition).PURUNITNAME);
+			 holder.tv_showSmallUnits.setText("数量/"+listAdapter.get(groupPosition).get(childPosition).UNITNAME);
+			 if(this.flag==0){
 			 if(longList.contains(getChildId(groupPosition, childPosition))){
 				 convertView.setBackgroundColor(Color.GREEN);
 			 }else{
 				 convertView.setBackgroundColor(Color.WHITE);
 			 }
+			}else{
+				convertView.setBackgroundColor(Color.WHITE);
+			}
 			 return convertView;
 		}
 		@Override

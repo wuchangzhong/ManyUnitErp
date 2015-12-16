@@ -11,6 +11,8 @@ import android.content.ClipboardManager;
 import android.content.ClipboardManager.OnPrimaryClipChangedListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,6 +102,9 @@ private SendingDetail sendingDetail;
 private BroadcastReceiver receiver;
 private String addr;
 private TextView tv_printText;
+private SharedPreferences sp;
+private Intent intent;
+private BluetoothAdapter btAdapter;
 
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +112,8 @@ protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.act_recovery);
 	initView();
+	sp = getSharedPreferences("config", MODE_PRIVATE);
+	addr = sp.getString("address", null);
 	receiver = new PDAReceiver() {
 		
 		@Override
@@ -159,6 +166,9 @@ private void initView(){
 			return true;
 		}
 	});
+	if(intent==null){
+		intent = new Intent(PrintAct.this,PrintSettingActivity.class);
+		}
 }
 @Override
 public void onClick(View v) {
@@ -167,6 +177,7 @@ public void onClick(View v) {
 		scanCode();
 		break;
 	case R.id.btn_confirmFBox:
+		
 		scanCode = et_FBoxcode.getText().toString();
 		handleCode(scanCode);
 		break;
@@ -175,7 +186,7 @@ public void onClick(View v) {
 		et_FBoxcode.setText("");
 		break;
 	case R.id.btn_print:
-		if(PrintSettingActivity.connect){
+		if(PrintSettingActivity.connect||addr!=null){
 			if(sendingDetail!=null&&sendingDetail.DATA!=null){
 			System.out.println("打印");
 		print();
@@ -184,7 +195,7 @@ public void onClick(View v) {
 			}
 //			print();
 		}else {
-			Intent intent = new Intent(PrintAct.this,PrintSettingActivity.class);
+			
 			startActivityForResult(intent, 0);
 		}
 		
@@ -200,9 +211,21 @@ public void onClick(View v) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(resultCode==RESULT_OK){
 			Bundle bundle = data.getExtras();
-			addr = bundle.getString("result");
+			
+			if(sp.getString("address", null)==null){
+				addr = bundle.getString("result");
+				Editor edit = sp.edit();
+				edit.putString("address", addr);
+				edit.commit();
+				}else{
+					addr = sp.getString("address", null);
+				}
+	
 			
 		}
+		
+		
+		
 	}
 /**
  * 自动扫描
@@ -272,8 +295,8 @@ private void comitData(){
  * 启动扫码
  */
 private void scanCode(){
-	Intent intent = new Intent("android.intent.action.FUNCTION_BUTTON_DOWN");
-	sendBroadcast(intent);
+	Intent intent1 = new Intent("android.intent.action.FUNCTION_BUTTON_DOWN");
+	sendBroadcast(intent1);
 }
 /**
  * 打印
@@ -319,12 +342,15 @@ private void print(){
 //	PrintSettingActivity.pl.printImage(bitmap);
 	if(!PrintSettingActivity.connect){
 		
-		BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+		btAdapter = BluetoothAdapter.getDefaultAdapter();
 		zpSDK.zp_open(btAdapter , btAdapter.getRemoteDevice(addr));
+			//跳转到选择设备界面
+			
+		
 	}
 //MyLablePrinter.printLable(-2); 
 MyLablePrinter.printLable(40,printStringFormat());
-clearView();
+//clearView();
 //MyLablePrinter.printLable(3);
 
 }
@@ -367,10 +393,21 @@ private void processData(String result){
 	}else{
 		
 		//展示打印内容
-		barcode.setImageBitmap(getBitmap(sendingDetail.DATA.get(0).TICKETNO));
-		tv_printText.setText(printFormat());
+		viewPrint();
+		LogUtil.i("展示", "打印内容");
 	}
-
+	if(PrintSettingActivity.connect||addr!=null){
+		if(sendingDetail!=null&&sendingDetail.DATA!=null){
+		System.out.println("打印");
+	print();
+		}else{
+			Toast.makeText(getApplicationContext(), "请检查发货箱", 0).show();
+		}
+//		print();
+	}else {
+		
+		startActivityForResult(intent, 0);
+	}
 }
 
 
@@ -382,15 +419,17 @@ private String printFormat(){
 	StringBuilder sb = new StringBuilder();
 	if(sendingDetail.DATA.size()>0){
 	sb.append("配送地区:   "+sendingDetail.DATA.get(0).SITENAME+"  ");
-	sb.append("发货口:"+sendingDetail.DATA.get(0).SENDPORTID+"\r\n");
+	sb.append("发货口:"+sendingDetail.DATA.get(0).SENDPORTID);
+	sb.append(" 发货箱号: "+ scanCode+"\r\n");
 	sb.append(sendingDetail.DATA.get(0).CONSIGNEEADD+"\r\n");
 //	sb.append("支付方式:     "+sendingDetail.DATA.get(0).CUSTOMERPAYTYPENAME+"\r\n");
 	sb.append("收件人: "+sendingDetail.DATA.get(0).CONSIGNEE+"  TEL:"+sendingDetail.DATA.get(0).MOBILE+"\r\n");
 	String bestDate = sendingDetail.DATA.get(0).RATIONDATE.substring(0, 10);
 	sb.append("配送时间:"+bestDate+"  "+sendingDetail.DATA.get(0).RATIONTIMEPERIOD+"\r\n");
 //	sb.append(sendingDetail.DATA.get(0).SITEID+"\r\n");
-//	sb.append("发货箱号:    "+ scanCode+"\r\n");
-	sb.append("订单号:     "+sendingDetail.DATA.get(0).SHEETID+"\r\n");
+	
+	sb.append("订单号: "+sendingDetail.DATA.get(0).SHEETID);
+	sb.append(" 支付方式: "+sendingDetail.DATA.get(0).CUSTOMERPAYTYPENAME);
 	}
 	
 	sb.append("\r\n");
@@ -405,16 +444,27 @@ private String[] printStringFormat(){
 	text[0] = sendingDetail.DATA.get(0).TICKETNO;//票号
 	text[1] ="配送地区: "+ sendingDetail.DATA.get(0).SITENAME;
 	text[2] = sendingDetail.DATA.get(0).CONSIGNEEADD;
-	text[3]= "支付方式: "+sendingDetail.DATA.get(0).CUSTOMERPAYTYPENAME;
-	text[4] = "发货口: "+ sendingDetail.DATA.get(0).SENDPORTID;
+	text[3]= " 支付方式: "+sendingDetail.DATA.get(0).CUSTOMERPAYTYPENAME;
+	text[4] = "发货口: "+ sendingDetail.DATA.get(0).SENDPORTID+" 箱号:"+scanCode;
 	text[5] = "收件人: "+sendingDetail.DATA.get(0).CONSIGNEE+"  TEL: "+sendingDetail.DATA.get(0).MOBILE;
-	text[6] = "配送时间: "+sendingDetail.DATA.get(0).RATIONTIMEPERIOD;
+	text[6] = "配送时间: "+sendingDate(sendingDetail.DATA.get(0).RATIONDATE)+sendingDetail.DATA.get(0).RATIONTIMEPERIOD;
 	text[7] = "订单号: "+sendingDetail.DATA.get(0).SHEETID;
+	
 	}else{
 		text = null;
 	}
 	
 	return text;
+}
+
+private String sendingDate(String date){
+	StringBuilder sb = new StringBuilder();
+	for(int x=0;x<10;x++){
+		sb.append(date.charAt(x));
+	}
+	sb.append(" ");
+	return sb.toString();
+	
 }
 //
 //private void autoEquit(){
@@ -471,6 +521,12 @@ private void clearView(){
 	barcode.setImageBitmap(null);
 	}
 }
+
+private void viewPrint(){
+	barcode.setImageBitmap(getBitmap(sendingDetail.DATA.get(0).TICKETNO));
+	tv_printText.setText(printFormat());
+}
+
 }
 
 
